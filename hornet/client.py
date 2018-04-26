@@ -59,6 +59,10 @@ class Client(object):
 
     def list_message(self, member):
         logger.info("List messages with %s", member)
+        last_message = models.Message.objects.filter(member=member).order_by('-datetime').first()
+        if last_message and last_message.datetime > member.last_online:
+            logger.debug("Member was online before last message. Read from DB")
+            return models.Message.objects.order_by('-datetime').all()
         url = self.BASE_URL + "messages/" + member.network_id + "/conversation.json"
         logger.debug("Request url %s", url)
         response = self.session.get(url, params={"profile_id": member.network_id,
