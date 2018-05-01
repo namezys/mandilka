@@ -11,12 +11,13 @@ logger = getLogger(__name__)
 CREATE = "create"
 UPDATE = "update"
 PRINT = "print"
+LOGIN = "login"
 
 
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument("action", choices=[CREATE, UPDATE, PRINT])
+        parser.add_argument("action", choices=[CREATE, UPDATE, PRINT, LOGIN])
         parser.add_argument("username")
         parser.add_argument("--password")
         parser.add_argument("--token")
@@ -29,6 +30,8 @@ class Command(BaseCommand):
             self.update(account, **kwargs)
         elif action == PRINT:
             self.print(account)
+        elif action == LOGIN:
+            self.login(account)
         else:
             raise AssertionError("Unknown action")
 
@@ -42,7 +45,7 @@ class Command(BaseCommand):
 
     def update(self, account, token, password, **kwargs):
         if not account:
-            self.stderr.write("Not found")
+            self.stderr.write("Account not found")
             return
         update_fields = []
         if token is not None:
@@ -63,5 +66,16 @@ class Command(BaseCommand):
             " username: %s" % account.username,
             " token: %s" % account.token,
         ])
+
+    def login(self, account):
+        if not account:
+            self.stderr.write("Account not found")
+            return
+        if not account.password:
+            self.stderr.write("Unknown password")
+            return
+        client = Client(account)
+        account.token = client.login()
+        account.save(update_fields=["token"])
 
 
