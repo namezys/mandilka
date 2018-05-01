@@ -28,6 +28,7 @@ class Member(models.Model):
     username = models.CharField(max_length=FIELD_LENGTH, null=False, blank=False)
     age = models.IntegerField(null=True, blank=True)
     distance = models.FloatField(null=True, blank=True)
+    last_online = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return "member #{0.pk}:{0.network_id}: {0.name} (age {0.age}) at {0.distance}".format(self)
@@ -47,6 +48,7 @@ class Member(models.Model):
         self.username = network_data['account']['username']
         self.age = network_data['age']
         self.distance = network_data.get('distance')
+        self.last_online = dateparse.parse_datetime(network_data['last_online'])
 
     @classmethod
     def get(cls, account, network_data):
