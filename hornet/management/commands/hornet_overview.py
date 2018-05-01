@@ -8,6 +8,7 @@ from .common import ClientCommand
 logger = getLogger(__name__)
 
 MIN_AGE = 6 * 3600
+ONLINE_AGE = 5 * 60
 
 MESSAGES = [
     "Привет. Познакомимся?",
@@ -26,9 +27,10 @@ class Command(ClientCommand):
         parser.add_argument("--update-distance", action="store_true")
         parser.add_argument("--method", choices=["near", "favorites"], default="near")
         parser.add_argument("--distance", type=float, default=35)
+        parser.add_argument("--online", action="store_true")
 
-    def handle(self, limit, update_distance, method, distance, *args, **options):
-        member_list = utils.increment_list(self.client.list_near, 1000)
+    def handle(self, limit, update_distance, method, distance, online, *args, **options):
+        member_list = utils.increment_list(self.client.list_near, 9000)
         logger.debug("Got %s members", len(member_list))
         utils.update_distance(member_list)
         member_list = [i for i in member_list if i.distance is not None and i.distance <= distance]
@@ -36,6 +38,10 @@ class Command(ClientCommand):
             
         for member in member_list:
             logger.debug("Check member %s", member)
+            if online and (now() - member.last_online).total_seconds() > ONLINE_AGE:
+                logger.debug("Member is offline. Skip it")
+                continue
+
             messages = sorted(self.client.list_message(member), key=lambda o: o.datetime)
             if messages:
                 if len(messages) >= 2:
