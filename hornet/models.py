@@ -10,6 +10,7 @@ FIELD_LENGTH = 64
 
 class Account(models.Model):
     username = models.CharField(max_length=FIELD_LENGTH, null=False, blank=False)
+    password = models.CharField(max_length=FIELD_LENGTH, null=True, blank=True)
     token = models.CharField(max_length=FIELD_LENGTH)
 
     @classmethod
@@ -28,7 +29,6 @@ class Member(models.Model):
     username = models.CharField(max_length=FIELD_LENGTH, null=False, blank=False)
     age = models.IntegerField(null=True, blank=True)
     distance = models.FloatField(null=True, blank=True)
-    last_online = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return "member #{0.pk}:{0.network_id}: {0.name} (age {0.age}) at {0.distance}".format(self)

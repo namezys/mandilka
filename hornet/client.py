@@ -24,6 +24,20 @@ class Client(object):
             self.session.headers["Authorization"] = "Hornet " + self.account.token
             self._authenticated = True
 
+    def login(self):
+        logger.info("Login %s", self.account)
+        assert self.account.password
+        url = self.BASE_URL + "session.json"
+        data = {
+            "session[id]": self.account.username,
+            "session[provider]": "Hornet",
+            "session[secret]": self.account.password
+        }
+        response = self.session.post(url, data=data)
+        logger.debug("Response %s", response)
+        response.raise_for_status()
+        return response.json()["session"]["access_token"]
+
     def set_filter(self, min_age, max_age):
         logger.info("Set filters")
         logger.info("Age filter: %s %s", min_age, max_age)
